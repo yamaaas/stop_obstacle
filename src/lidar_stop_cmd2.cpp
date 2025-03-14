@@ -42,16 +42,19 @@ public:
   void process_data(){
     
     int count = lidar_data_.scan_time/ lidar_data_.time_increment;
-
+    auto cmd_msg = geometry_msgs::msg::Twist();
     for(int i=0;i<count;i++){
       if(lidar_data_.ranges[i] > lidar_data_.range_min && lidar_data_.ranges[i] <0.3 && have_published == false && cmd_vel_smooth_.linear.x!=0.0 &&cmd_vel_smooth_.angular.z!=0.0){
-        auto cmd_msg = geometry_msgs::msg::Twist();
         cmd_msg.linear.x = 0.0;
         cmd_msg.angular.z = 0.0;
         cmd_vel_ -> publish(cmd_msg);
         
         RCLCPP_INFO(this -> get_logger(), "STOP cmd_vel published (x=0, z=0)!");
         have_published = true;
+      }
+      else{
+        cmd_msg.linear.x = cmd_vel_smooth_.linear.x;
+        cmd_msg.angular.z = cmd_vel_smooth_.angular.z;
       }
     }
   
